@@ -25,21 +25,14 @@ class LoginForm extends Model
     public function login()
     {
         if ($this->validate()) {
-            // Находим пользователя по email
             $user = User::findOne(['email' => $this->email]);
 
-            if ($user && Yii::$app->security->validatePassword($this->password, $user->password_hash) && $user->isAdmin) {
-                // Если пользователь найден, пароль верный и он администратор
-                $accessToken = AccessToken::findOne(['userId' => $user->id]);
-
-                if ($accessToken) {
-                    // Логиним пользователя с использованием access token
-                    Yii::$app->user->loginByAccessToken($accessToken->token);
-                    return true; // Успешный вход
-                }
+            if ($user && Yii::$app->security->validatePassword($this->password, $user->passwordHash)) {
+                Yii::$app->user->login($user);
+                return true;
             }
         }
 
-        return false; // Неудачный вход
+        return false;
     }
 }
